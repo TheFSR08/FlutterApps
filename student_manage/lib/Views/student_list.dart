@@ -33,7 +33,7 @@ class _StudentListViewState extends State<StudentListView> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Lista de Estudiantes'),
-        backgroundColor: Colors.deepPurple,  // Color de la AppBar
+        backgroundColor: const Color.fromARGB(255, 207, 205, 210),  // Color de la AppBar
       ),
       body: FutureBuilder<List<Student>>(
         future: studentList,
@@ -69,7 +69,7 @@ class _StudentListViewState extends State<StudentListView> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         IconButton(
-                          icon: const Icon(Icons.edit, color: Colors.blue),
+                          icon: const Icon(Icons.edit, color: Color.fromARGB(255, 22, 39, 53)),
                           onPressed: () {
                             showDialog(
                               context: context,

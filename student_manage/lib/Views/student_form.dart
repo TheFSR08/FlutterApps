@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:student_manage/Controller/student_controller.dart';
 import 'package:student_manage/Views/student_list.dart';
 import '../models/student.dart';
@@ -15,6 +16,8 @@ class StudentFormView extends StatelessWidget {
   final _gradeController = TextEditingController();
   final _emailController = TextEditingController();
   final _photoController = TextEditingController();
+  
+  get label => null;
 
   @override
   Widget build(BuildContext context) {
@@ -29,15 +32,27 @@ class StudentFormView extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(student == null ? 'Nuevo Estudiante' : 'Editar Estudiante'),
-        backgroundColor: Colors.deepPurple, // Color más moderno para el AppBar
+        backgroundColor: const Color.fromARGB(255, 183, 180, 189), // Color más moderno para el AppBar
         elevation: 0, // Eliminar sombra para un look más limpio
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Form(
+         child: Form(
           key: _formKey,
           child: ListView(
             children: [
+        // Texto encima del formulario
+        const Text(
+          'Crear Nuevo Estudiante',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Color.fromARGB(255, 15, 1, 39),
+              ),
+              textAlign: TextAlign.center               
+              ),
+              const SizedBox(height: 16), // Espaciado entre el texto y el formulario
+            
               // Nombre
               _buildTextField(
                 controller: _nameController,
@@ -108,6 +123,7 @@ class StudentFormView extends StatelessWidget {
               _buildButton(
                 context,
                 label: student == null ? 'Guardar Estudiante' : 'Actualizar Estudiante',
+                color: const Color.fromARGB(255, 244, 251, 254),
                 onPressed: () async {
                   if (_formKey.currentState?.validate() ?? false) {
                     var id = student?.id ?? '0'; // Si es un nuevo estudiante, ID es '0'
@@ -124,7 +140,49 @@ class StudentFormView extends StatelessWidget {
                       await controller.addStudent(newStudent, context);
                     } else {
                       // Actualizar estudiante
-                      await controller.updateStudent(student!.id, newStudent, context);
+                       showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  title: const Text("Confirmar actualización"),
+                                  content: const Text("¿Deseas actualizar la información de este estudiante?"),
+                                  actions: [
+                                    TextButton(
+                                      child: const Text("No"),
+                                      onPressed: () {
+                                        Navigator.of(context).pop();
+                                      },
+                                    ),
+                                    TextButton(
+                                      child: const Text("Sí"),
+                                      onPressed: () {
+                                        Navigator.of(context).pop();
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => StudentFormView(
+                                              controller: controller,
+                                              student: student,
+                                            ),
+                                          ),
+                                        ).then((_) {
+                                          Fluttertoast.showToast(
+                                            msg: "El estudiante ha sido actualizado",
+                                            toastLength: Toast.LENGTH_SHORT,
+                                            gravity: ToastGravity.BOTTOM,
+                                            backgroundColor: Colors.blue,
+                                            textColor: Colors.white,
+                                          );
+                                          // ignore: use_build_context_synchronously
+                                          Navigator.of(context).pop();
+                                        });
+                                      },
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+                     // await controller.updateStudent(student!.id, newStudent, context);
                     }
                     navigateToAnotherView(context);
                   }
@@ -136,9 +194,44 @@ class StudentFormView extends StatelessWidget {
                 _buildButton(
                   context,
                   label: 'Eliminar Estudiante',
-                  color: Colors.red,
+                  color: const Color.fromARGB(255, 205, 186, 184),
                   onPressed: () async {
-                    await controller.deleteStudent(student!.id); // Eliminar estudiante
+                    showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  title: const Text("Confirmar eliminación"),
+                                  content: const Text(
+                                      "¿Estás seguro de que deseas eliminar este estudiante?"),
+                                  actions: [
+                                    TextButton(
+                                      child: const Text("No"),
+                                      onPressed: () {
+                                        Navigator.of(context).pop();
+                                      },
+                                    ),
+                                    TextButton(
+                                      child: const Text("Sí"),
+                                      onPressed: () async {
+                                        Navigator.of(context).pop();
+                                        await controller
+                                            .deleteStudent(student!.id);
+                                        Fluttertoast.showToast(
+                                          msg:
+                                              "El estudiante ha sido eliminado",
+                                          toastLength: Toast.LENGTH_SHORT,
+                                          gravity: ToastGravity.BOTTOM,
+                                          backgroundColor: Colors.green,
+                                          textColor: Colors.white,
+                                        );                                        
+                                        Navigator.pop(context);
+                                      },
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+                  //  await controller.deleteStudent(student!.id); // Eliminar estudiante
                     Navigator.pop(context);
                   },
                 ),
